@@ -1,11 +1,7 @@
 library(plotly)
 library(tidyverse)
 library(maps)
-#library(sp)
-#library(rgdal)
 library(ggplot2)
-#library(maptools)
-#library(mapproj)
 library(shiny)
 library(scales)
 
@@ -16,33 +12,56 @@ testdat <- read.csv(datfile,stringsAsFactors = F)
 
 
 ui <- fluidPage(
-  titlePanel("Air Data"),
+  titlePanel("Air Data from 1999 to 2004 from EPA"),
+  
   sidebarPanel(
-    selectInput("selectyear", 
-                label = "Select Year:", 
-                choices = as.character(unique(testdat$Year)),
-                selected = "1999"),
+    h2("Welcome"),
+    p("You can explore the air data in this Shiny App!
+      The data is from ", a("EPA.", href = "https://www.epa.gov/outdoor-air-quality-data") ),
+    p("Data preprocess step can be found ", a("here.", href="https://github.com/chendong94/BMI706-Visaulization-for-Biomedical-Application/blob/master/Project/datagen.R")),
+    
+    h2("How to use"),
+    p("First, select the air parameter of insterest. 
+      Then, select year to view the parameter quantity across US county in that year.
+      If you want to see the trend of the parameter, click Trend tab.
+      Then, select the county of interest.
+      There is also raw data available to filter and explore under Table tab."),
     
     selectInput("selectpara", 
                 label = "Select Parameter:", 
                 choices = unique(testdat$Parameter.Name),
                 selected = "Ambient Min Temperature"),
+    
+    selectInput("selectyear", 
+                label = "Select Year for Map:", 
+                choices = as.character(unique(testdat$Year)),
+                selected = "1999"),
+    
+
     selectInput("selectcounty", 
-                label = "Select County:", 
+                label = "Select County for Trend:", 
                 choices = unique(paste0(testdat$State.Name,",",testdat$County.Name)),
                 selected = "Alabama,Clay")
   ),
   
   mainPanel(
-    plotlyOutput("map"),
-    plotlyOutput("trend"),
-    
-    verbatimTextOutput("click")
+    tabsetPanel(
+      tabPanel("Map", plotlyOutput("map")), 
+      tabPanel("Trend", plotlyOutput("trend")),
+      tabPanel("Table", dataTableOutput("table"))
+    )
+    # plotlyOutput("map"),
+    # plotlyOutput("trend"),
+    # plotlyOutput("hist")
+    #verbatimTextOutput("click")
   )
 );
 
 server <- function(input, output,session) {
-  output$map <- renderPlotly({
+  
+
+  
+ # output$map <- renderPlotly({
     
     output$map <- renderPlotly({
       
@@ -98,8 +117,8 @@ server <- function(input, output,session) {
                geo = geo)
 
       
-      ggplotly(p)
-      
+      # ggplotly(p)
+      p
     })
     
     
@@ -124,13 +143,18 @@ server <- function(input, output,session) {
         theme_bw(base_size = 12)
     })
     
-    output$click <- renderPrint({
-      d <- event_data("plotly_click")
-      
-      if (is.null(d) == T) return (NULL);
-      
-      if (is.null(d)) "Click events appear here (double-click to clear)" else d
-    });
+    # output$click <- renderPrint({
+    #   d <- event_data("plotly_click")
+    #   
+    #   if (is.null(d) == T) return (NULL);
+    #   
+    #   if (is.null(d)) "Click events appear here (double-click to clear)" else d
+    # });
+  #})
+  output$table <- renderDataTable({
+    testdat %>% 
+      filter(Year==input$selectyear) %>% 
+      filter(Parameter.Name==input$selectpara)
   })
 };
 
