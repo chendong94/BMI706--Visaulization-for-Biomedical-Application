@@ -8,7 +8,10 @@ library(maptools)
 library(mapproj)
 library(shiny)
 
-testdat <- read.csv("../airdata.csv",stringsAsFactors = F,nrows = 50000)
+
+datfile <- "https://raw.githubusercontent.com/chendong94/BMI706-Visaulization-for-Biomedical-Application/master/Project/airdata.csv"
+
+testdat <- read.csv(datfile,stringsAsFactors = F,nrows = 50000)
 
 
 ui <- fluidPage(
@@ -48,17 +51,18 @@ server <- function(input, output,session) {
       
       dat <- testdat %>% 
         filter(Year==input$selectyear) %>% 
-        filter(Parameter.Name==input$selectpara)
+        filter(Parameter.Name==input$selectpara) %>%
+        mutate(loc=paste0(tolower(State.Name),",",tolower(County.Name)))
       
-      county_data <- map_data("county")
+      county_data <- map_data("county") %>% mutate(loc=paste0(region,",",subregion))
       
       para <- dat %>%
-        group_by(County.Name) %>%
+        group_by(loc) %>%
         summarise(Mean = mean(Arithmetic.Mean))
       
-      para$County.Name <- tolower(para$County.Name)
+      #para$County.Name <- tolower(para$County.Name)
       
-      county_para <- merge(county_data, para, by.x = "subregion", by.y = "County.Name")
+      county_para <- merge(county_data, para, by.x = "loc", by.y = "loc")
       
       county_para$color <- cut(county_para$Mean,
                                breaks = seq(min(county_para$Mean), 
@@ -67,6 +71,7 @@ server <- function(input, output,session) {
       )
       
       county_para <- county_para %>% arrange(order)
+      
       p <- county_para %>%
         group_by(group) %>%
         plot_geo(
@@ -74,7 +79,7 @@ server <- function(input, output,session) {
           y = ~ lat,
           color = ~ color,
           colors = c('#ffeda0', '#f03b20'),
-          text = ~ subregion,
+          text = ~ loc,
           hoverinfo = "text") %>% 
         add_polygons(line = list(width = 0.4)) %>%
         add_polygons(
@@ -99,7 +104,8 @@ server <- function(input, output,session) {
     
     # Trend Plot
     output$trend <- renderPlotly({
-      dat <- testdat %>% filter(Parameter.Name==input$selectpara)
+      dat <- testdat %>% filter(Parameter.Name==input$selectpara) %>% filter(County.Name=="Clay")
+      
       #p <- ggplot(dat)
     })
     
