@@ -1,0 +1,12 @@
+name: AirData1999-2004
+title: AirData1999-2004
+username:
+account: dongchenhms
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 332813
+bundleId: 1344384
+url: https://dongchenhms.shinyapps.io/AirData1999-2004/
+when: 1524885724.29795
+asMultiple: FALSE
+asStatic: FALSE

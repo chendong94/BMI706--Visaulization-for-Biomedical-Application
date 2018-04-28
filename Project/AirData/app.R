@@ -1,17 +1,18 @@
 library(plotly)
 library(tidyverse)
 library(maps)
-library(sp)
-library(rgdal)
+#library(sp)
+#library(rgdal)
 library(ggplot2)
-library(maptools)
-library(mapproj)
+#library(maptools)
+#library(mapproj)
 library(shiny)
+library(scales)
 
 
 datfile <- "https://raw.githubusercontent.com/chendong94/BMI706-Visaulization-for-Biomedical-Application/master/Project/airdata.csv"
 
-testdat <- read.csv(datfile,stringsAsFactors = F,nrows = 50000)
+testdat <- read.csv(datfile,stringsAsFactors = F)
 
 
 ui <- fluidPage(
@@ -25,7 +26,11 @@ ui <- fluidPage(
     selectInput("selectpara", 
                 label = "Select Parameter:", 
                 choices = unique(testdat$Parameter.Name),
-                selected = "Ambient Min Temperature")
+                selected = "Ambient Min Temperature"),
+    selectInput("selectcounty", 
+                label = "Select County:", 
+                choices = unique(paste0(testdat$State.Name,",",testdat$County.Name)),
+                selected = "Alabama,Clay")
   ),
   
   mainPanel(
@@ -60,8 +65,6 @@ server <- function(input, output,session) {
         group_by(loc) %>%
         summarise(Mean = mean(Arithmetic.Mean))
       
-      #para$County.Name <- tolower(para$County.Name)
-      
       county_para <- merge(county_data, para, by.x = "loc", by.y = "loc")
       
       county_para$color <- cut(county_para$Mean,
@@ -79,14 +82,12 @@ server <- function(input, output,session) {
           y = ~ lat,
           color = ~ color,
           colors = c('#ffeda0', '#f03b20'),
-          text = ~ loc,
-          hoverinfo = "text") %>% 
+          text = ~ paste(loc, "<br />", Mean)) %>% 
         add_polygons(line = list(width = 0.4)) %>%
         add_polygons(
           fillcolor = 'transparent',
           line = list(color = 'grey', width = 0.5),
-          showlegend = FALSE,
-          hoverinfo = 'none') %>%
+          showlegend = FALSE) %>%
         add_annotations( text = testdat$Units.of.Measure[testdat$Parameter.Name == input$selectpara][1],
                          xref = "paper", yref = "paper",
                          x = 1.02, xanchor = "left",
@@ -95,7 +96,7 @@ server <- function(input, output,session) {
         layout(title = paste0(input$selectpara, " by County"),
                legend=list(y=0.8, yanchor="top" ),
                geo = geo)
-      
+
       
       ggplotly(p)
       
@@ -104,9 +105,23 @@ server <- function(input, output,session) {
     
     # Trend Plot
     output$trend <- renderPlotly({
-      dat <- testdat %>% filter(Parameter.Name==input$selectpara) %>% filter(County.Name=="Clay")
       
-      #p <- ggplot(dat)
+      dat <- testdat %>% 
+        filter(Parameter.Name==input$selectpara) %>%
+        mutate(loc=paste0(tolower(State.Name),",",tolower(County.Name))) %>%
+        filter(loc==tolower(input$selectcounty))
+
+      
+      base <- dat %>% group_by(Year) %>% summarise(mean=mean(Arithmetic.Mean))
+
+      
+      ggplot(base,aes(x = Year, y = mean)) + 
+        geom_point(aes(size=0.2)) + 
+        geom_smooth(method=lm, se=FALSE) +
+        scale_x_continuous(breaks= pretty_breaks(length(base$Year)-1)) +
+        labs(title=paste0("Trend of ",input$selectpara)) +
+        ylab(paste0("Yearly Mean/",testdat$Units.of.Measure[testdat$Parameter.Name == input$selectpara][1])) +
+        theme_bw(base_size = 12)
     })
     
     output$click <- renderPrint({
