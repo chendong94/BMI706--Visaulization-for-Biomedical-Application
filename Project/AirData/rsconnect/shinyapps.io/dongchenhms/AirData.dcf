@@ -1,0 +1,12 @@
+name: AirData
+title: AirData
+username:
+account: dongchenhms
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 332779
+bundleId: 1344323
+url: https://dongchenhms.shinyapps.io/AirData/
+when: 1524879934.02385
+asMultiple: FALSE
+asStatic: FALSE

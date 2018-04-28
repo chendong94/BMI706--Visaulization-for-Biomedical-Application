@@ -1,0 +1,290 @@
+---
+title: "R Shiny Example"
+author: "Chen Dong"
+output: html_document
+runtime: shiny
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(reshape2)
+library(plotly)
+library(shiny)
+library(network)
+library(tidyverse)
+```
+
+## Libraries 
+
+The code used to create the plots below requires inclusion of the following libraries:
+
+  * `reshape2`
+  * `plotly`  
+  * `shiny`
+
+## Overview
+
+In this notebook, we will demonstrate how to use an R Shiny server to provide interaction with a plot.
+
+First we have to load our data and reshape it so that the country is in a column called `country`. So we go from a table with countries as the columns:
+
+```
+week Afghanistan Germany
+1           10      60
+2           15      63
+3           25      64
+```
+
+To one where the country and counts are in their own column:
+
+```
+week  country count
+1     Afghanistan 10
+2     Afghanistan 15
+3     Afghanistan 25
+1     Germany     60
+2     Germany     63
+3     Germany     64
+```
+
+This will make it easier to filter the data on the Shiny server.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+t <- read.table('../HW1/flunet2010_11countries.csv', sep=',', header=T, stringsAsFactors=F)
+
+head(t)
+
+library(shiny)
+library(reshape2)
+library(plotly)
+
+d1 <- data.frame(Col1=c("Afghanistan","Argentina",
+                        "Australia","Canada", "China", 
+                        "Colombia", "Egypt", "Germany", 
+                        "Ireland", "South.Africa", "USA"),
+                 Col2=c('Asia', 'South America', 'Australia', 'North America', 
+                        'Asia', 'South America', 'Africa', 'Europe', 'Europe', 
+                        'Africa', 'North America'),
+                 stringsAsFactors=FALSE)
+
+colnames(t) <- t[1,]
+t <- t[-1,]
+
+lst <- melt(t, id.vars=1:1, 
+            variable.name="country", 
+            value.name="count")
+
+lst$week <- as.numeric(lst$week)
+lst$count <- as.numeric(lst$count)
+```
+
+Next we will create an R Shiny app that lets us select the country and weeks that are displayed in our plot. The UI element will contain a selection box for the country and an input slider for the weeks. This control will pass its values to the server which will return a rendered plot.
+
+The interface between the UI and server is through the `input` variable. Each selection control in the UI sets a member of the input variable which can then be accessed in the server. As part of the problem set, we will add a selector that lets us choose which country we wish to view the plot for (Problem 1.1), a slider that lets us select a week range (Problem 1.2) and an event handler that lets us update the UI controls in response to user interactions with the Plotly plot (Problem 1.3).
+
+```{r, echo=FALSE, warning=FALSE}
+ui <- fluidPage(
+  titlePanel("Flu across the world"),
+  sidebarPanel(
+    # 1.1 Add a dropdown for the list of countries that we can select
+    selectInput("select", 
+                label = "Select a country:", 
+                choices = d1$Col1,
+                selected = "Afghanistan"),
+    # 1.2 Add a slider to select which weeks should be visible
+    #)
+    sliderInput("slide", 
+                label = "Range:",
+                min = 1, max = 52, value = c(1, 52))
+  ),
+  
+  mainPanel(
+    plotlyOutput("plot"),
+    
+    # we need the following output so that we catch events in
+    # the plots
+    
+    verbatimTextOutput("click")
+  )
+);
+
+server <- function(input, output,session) {
+  output$plot <- renderPlotly({
+
+    output$plot <- renderPlotly({
+      # (1.1 and 1.2) Display the line plot as filtered by the input country
+      # and week range
+      dat <- lst[lst$country==input$select,]
+      p <- ggplot(dat) + geom_line(aes(x=week,y=count)) + xlim(input$slide)
+      ggplotly(p)
+    
+    })
+    
+    output$click <- renderPrint({
+      # Problem 1.3, update the week slider here
+      d <- event_data("plotly_relayout")
+      updateSliderInput(session, "slide", value = round(as.numeric(d))[1:2])
+    });
+  })
+};
+
+shinyApp(ui, server, options = list(height=600));
+```
+
+## Example 2
+
+This example will illustrate two linked plots as well as a controller that modifies both. The purpose of these plots is to show the correlation in flu cases between different countries. The first plot is a heatmap of absolute values of the pairwise correlation coefficients. The second is a node-link diagram showing which countries have highly correlated flu incidence rates.
+
+Because the threshold for the correlation that we use to create the node link diagram is somewhat arbitrary, we will include a slider that we can use to vary it and see its effect on the heatmap and node-link (Problem 2.1). To help us get a sense of which cells in the matrix correspond to which links in the diagram, we will add an interaction that highlights links when we click on a cell in the matrix (Problem 2.2). While working on this problem, beware of two caveats:
+
+1. Because the matrix is filtered to contain only the correlations that are above our threshold, clicking on cells with a lower threshold will not highlight anything. 
+
+2. As far as we can tell, plotly does not provide a way to click on lines connecting points so the interaction will be unidirectional.
+
+```{r, echo=FALSE, warning=FALSE}
+countries <- unique(lst$country)
+
+# calculate the correlation matrix
+# without using the "week" columns
+t <- as.data.frame(data.matrix(t))
+
+tc <- t[ , !(names(t) %in% c("week"))]
+m <- abs(cor(tc))
+
+ui <- fluidPage(
+  titlePanel("Correlations between flu incidences in different countries"),
+  
+  # Problem 2.1, add a control for selecting the correlation coefficient
+  sidebarPanel(
+    sliderInput("slide",
+                label = "Correlation coefficient threshold:",
+                min = 0,
+                max = 1,
+                value = 0.5)
+  ),
+  
+  mainPanel(
+    plotlyOutput("plot"),
+    plotlyOutput("network"),
+    verbatimTextOutput("click"),
+    verbatimTextOutput("event")
+    
+  )
+);
+
+server <- function(input, output,session) {
+  output$network <- renderPlotly({
+    set.seed(1);
+    
+    tc <- t[ , !(names(t) %in% c("week"))]
+    m <- abs(cor(tc))
+    m2 <- m
+    m2[abs(m)<input$slide] <- 0
+    
+    # Problem 2.1, subset the matrix so that only correlations within
+    # the given range are used (correlations can be both positive and negative)
+    
+    countries <- colnames(m2)
+    
+    n <- network(m2)
+    la <- network.layout.fruchtermanreingold(n, NULL)
+    
+    country_points <- data.frame(x=la[,1],y=la[,2], country=countries);
+      
+    event.data <- event_data("plotly_click")
+      edge_shapes <- list()
+      n <- length(country_points$country)
+
+      for(i in 1:n) {
+        for(j in 1:n) {
+          
+          if (!is.na(m2[i,j]) && m2[i,j] > 0) {
+            if (is.null(event.data)){
+              width <- 1
+            
+              # Problem 2.2, highlight the selected link by increasing its
+              # width to some larger than 1 value
+              edge_shape = list(type = "line",
+              line = list(color = "#030303", width = width))
+              edge_shape[['x0']] = country_points$x[i]
+              edge_shape[['y0']] = country_points$y[i]
+              edge_shape[['x1']] = country_points$x[j]
+              edge_shape[['y1']] = country_points$y[j]
+              edge_shapes <- c(edge_shapes, list(edge_shape))
+            }
+            else{
+              if (attr(m2,"dimnames")[[1]][i]==event.data$x && attr(m2,"dimnames")[[2]][j]==event.data$y){
+              
+                width <- 3
+                
+                # Problem 2.2, highlight the selected link by increasing its
+                # width to some larger than 1 value
+                edge_shape = list(type = "line",
+                line = list(color = "#030303", width = width))
+                edge_shape[['x0']] = country_points$x[i]
+                edge_shape[['y0']] = country_points$y[i]
+                edge_shape[['x1']] = country_points$x[j]
+                edge_shape[['y1']] = country_points$y[j]
+                edge_shapes <- c(edge_shapes, list(edge_shape))
+              }
+              
+              else {
+                width <- 1
+                
+                # Problem 2.2, highlight the selected link by increasing its
+                # width to some larger than 1 value
+                edge_shape = list(type = "line",
+                line = list(color = "#030303", width = width))
+                edge_shape[['x0']] = country_points$x[i]
+                edge_shape[['y0']] = country_points$y[i]
+                edge_shape[['x1']] = country_points$x[j]
+                edge_shape[['y1']] = country_points$y[j]
+                edge_shapes <- c(edge_shapes, list(edge_shape))
+              }
+            }
+          }
+        }
+      }
+      
+      ax <- list(
+        showgrid = FALSE,
+        showticklabels = FALSE,
+        showline = FALSE,
+        zeroline = FALSE
+      );
+      
+      net <- plot_ly(country_points, x=~x, y=~y, text=~country, xaxis=ax, yaxis=ax)
+
+      p <- layout(net,
+                  shapes=edge_shapes, xaxis=ax, yaxis=ax)
+    });
+
+  output$plot <- renderPlotly({
+    # renderPlotly() also understands ggplot2 objects!
+    # Problem 2.1, subset the correlation matrix and display it as a heatmap
+    output$plot <- renderPlotly({
+      tc <- t[ , !(names(t) %in% c("week"))]
+      m <- abs(cor(tc))
+      m2 <- m
+      m2[abs(m)<input$slide] <- 0
+      plot_ly(x=rownames(m2), y=colnames(m2), z = m2, type = "heatmap")
+    
+    })
+    
+    output$click <- renderPrint({
+      d <- event_data("plotly_click")
+
+      if (is.null(d) == T) return (NULL);
+      
+      #updateSelectInput(session, "country", selected=country_points$country[d$pointNumber + 1]);
+      if (is.null(d)) "Click events appear here (double-click to clear)" else d
+    })
+  })
+};
+
+shinyApp(ui, server, options=list(height=1000))
+```
+
+

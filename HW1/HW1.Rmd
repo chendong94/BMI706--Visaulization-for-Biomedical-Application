@@ -1,0 +1,73 @@
+---
+title: "HW1"
+author: "Chen Dong"
+date: "3/25/2018"
+output: html_document
+---
+Source: https://plot.ly/r/
+https://plot.ly/ggplot2/
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(plotly)
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r}
+dat.raw <-
+  read.csv("flunet2010_11countries.csv",
+  header = F,
+  stringsAsFactors = FALSE)
+dat <-
+  read.csv(
+  "flunet2010_11countries.csv",
+  header = F,
+  skip = 2,
+  stringsAsFactors = FALSE)
+region <- as.factor(as.matrix(dat.raw[1,-1]))
+colnames(dat) <- as.character(as.matrix(dat.raw[2, ]))
+```
+
+```{r}
+plot_ly(
+  dat,
+  x =  ~ week,
+  y =  ~ China,
+  type = 'scatter',
+  mode = 'lines'
+  ) %>% layout(
+  title = "Flu Incidence",
+  xaxis = list(title = "Weeks"),
+  yaxis = list(title = "Number of Flu Incidence in China")
+  )
+```
+
+```{r}
+y <- colSums(dat, na.rm = T)[-1]
+x <- names(y)
+plot_ly(
+  y = as.character(y),
+  x = as.character(region),
+  histfunc = 'sum',
+  type = "histogram"
+) %>%
+  layout(title = "Total Regional Flu Incidence",
+         yaxis = list(title = "Number of Incidence", type = 'linear'))
+```
+
+```{r}
+p <- ggplot(data = dat, mapping = aes(x = week, y = USA)) + geom_point() + stat_smooth(method = 'lm') + ggtitle("Flu Trend in USA") + ylab("Number of Incidence") + theme_bw() 
+ggplotly(p)
+```
+
+```{r}
+dat.new <- dat %>% gather(Country,Incidence,-week)
+p <- ggplot(dat.new, aes(Country, y=Incidence)) + 
+  geom_boxplot() + 
+  ggtitle("Boxplot of Flu Incidence by Country") +
+  theme_bw()
+ggplotly(p)
+```
+
+
+

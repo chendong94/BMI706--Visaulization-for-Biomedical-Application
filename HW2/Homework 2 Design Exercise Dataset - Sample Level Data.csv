@@ -1,0 +1,50 @@
+Patient ID,Timepoint,Cancer Type Detailed,IDH1 Mutation,Neoplasm Histologic Grade,Sample Type,Mutation Count
+P01,1,Astrocytoma,R132H,II,Primary,39
+P01,2,Glioblastoma,R132H,IV,Recurrence,1226
+P02,1,Oligoastrocytoma,R132H,II,Primary,24
+P02,2,Anaplastic Astrocytoma,R132H,III,Recurrence,21
+P04,1,Astrocytoma,R132C,II,Primary,12
+P04,2,Anaplastic Astrocytoma,R132C,III,Recurrence,28
+P04,3,Anaplastic Astrocytoma,R132C,III,Recurrence,18
+P04,4,Anaplastic Astrocytoma,R132C,III,Recurrence,55
+P05,1,Astrocytoma,R132H,II,Primary,29
+P05,2,Glioblastoma,R132H,IV,Recurrence,1381
+P06,1,Astrocytoma,R132H,II,Primary,1
+P06,2,Astrocytoma,R132H,II,Recurrence,20
+P07,1,Astrocytoma,R132H,II,Primary,101
+P07,2,Astrocytoma,R132H,II,Recurrence,125
+P08,1,Oligoastrocytoma,R132H,II,Primary,20
+P08,2,Glioblastoma,R132H,IV,Recurrence,50
+P09,1,Astrocytoma,R132H,II,Primary,5
+P09,2,Glioblastoma,R132H,IV,Recurrence,33
+P10,1,Astrocytoma,R132H,II,Primary,27
+P10,2,Glioblastoma,R132H,IV,Recurrence,1886
+P11,1,Oligoastrocytoma,R132H,II,Primary,19
+P11,2,Oligoastrocytoma,R132H,II,Recurrence,26
+P12,1,Astrocytoma,R132H,II,Primary,16
+P12,2,Anaplastic Astrocytoma,R132H,III,Recurrence,19
+P13,1,Oligoastrocytoma,R132G,II,Primary,26
+P13,2,Oligoastrocytoma,R132G,II,Recurrence,27
+P15,1,Oligoastrocytoma,R132H,II,Primary,20
+P15,2,Oligoastrocytoma,R132H,II,Recurrence,23
+P16,1,Astrocytoma,R132H,II,Primary,28
+P16,2,Astrocytoma,R132H,II,Recurrence,30
+P17,1,Oligodendroglioma,R132H,II,Primary,16
+P17,2,Glioblastoma,R132H,IV,Recurrence,29
+P18,1,Oligoastrocytoma,R132H,II,Primary,50
+P18,2,Glioblastoma,R132H,IV,Recurrence,1708
+P21,1,Oligoastrocytoma,R132H,II,Primary,23
+P21,2,Glioblastoma,R132H,IV,Recurrence,644
+P24,1,Astrocytoma,R132H,II,Primary,18
+P24,2,Astrocytoma,R132H,II,Recurrence,1633
+P24,3,Glioblastoma,R132H,IV,Recurrence,12
+P25,1,Astrocytoma,R132H,II,Primary,36
+P25,2,Glioblastoma,R132H,IV,Recurrence,85
+P26,1,Astrocytoma,R132H,II,Primary,20
+P26,2,Anaplastic Astrocytoma,R132H,III,Recurrence,23
+P27,1,Astrocytoma,R132H,II,Primary,24
+P27,2,Anaplastic Astrocytoma,R132H,III,Recurrence,32
+P28,1,Astrocytoma,R132H,II,Primary,15
+P28,2,Anaplastic Astrocytoma,R132H,III,Recurrence,22
+P29,1,Astrocytoma,R132H,II,Primary,35
+P29,2,Anaplastic Astrocytoma,R132H,III,Recurrence,36

@@ -1,0 +1,24 @@
+Patient ID,Diagnosis Age,Overall Survival (Months),Overall Survival Status,Sex,Treatment
+P01,28,58,DECEASED,Male,Chemotherapy (Temozolomide)
+P02,26,5,DECEASED,Female,
+P04,22,61,DECEASED,Male,
+P05,39,74,DECEASED,Female,Chemotherapy (Temozolomide)
+P06,22,87,DECEASED,Male,Chemotherapy (Temozolomide)
+P07,30,148,DECEASED,Male,Radiation Therapy
+P08,44,103,DECEASED,Male,
+P09,28,45,DECEASED,Male,Radiation Therapy
+P10,41,44,DECEASED,Female,Chemotherapy (Temozolomide)
+P11,30,186,DECEASED,Female,Chemotherapy (Temozolomide)
+P12,35,82,LIVING,Male,
+P13,24,106,DECEASED,Male,
+P15,38,143,LIVING,Female,
+P16,35,38,DECEASED,Female,
+P17,27,59,LIVING,Male,Chemotherapy (Temozolomide)
+P18,49,106,LIVING,Male,Chemotherapy (Temozolomide)
+P21,27,35,DECEASED,Male,Chemotherapy (Temozolomide)
+P24,34,109,DECEASED,Male,Radiation Therapy
+P25,39,42,LIVING,Male,
+P26,36,47,LIVING,Female,
+P27,56,54,LIVING,Male,
+P28,30,137,LIVING,Male,
+P29,52,109,DECEASED,Male,

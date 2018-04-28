@@ -1,0 +1,245 @@
+---
+title: "Multiple Coordinated Views<br>with `plotly` and `crosstalk`"
+author: "Chen Dong"
+
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(reshape2)
+library(plotly)
+library(crosstalk)
+```
+
+## Libraries 
+
+The code used to create the plots below requires inclusion of the following libraries:
+
+  * `tidyverse`
+  * `reshape2`
+  * `plotly`  
+  * `crosstalk`
+
+## Session Information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+
+```{r, echo=FALSE}
+# read and prepare the data
+st <- read.table('flunet2010_11countries.csv', sep=',', header=T, stringsAsFactors=F, skip=1)
+
+# additional data to be used for some visualizations
+d1 <- data.frame(country=c("Afghanistan","Argentina",
+                        "Australia","Canada", "China", 
+                        "Colombia", "Egypt", "Germany", 
+                        "Ireland", "South.Africa", "USA"),
+                 continent=c('Asia', 'South America', 'Australia', 'North America', 
+                        'Asia', 'South America', 'Africa', 'Europe', 'Europe', 
+                        'Africa', 'North America'),
+                 hemisphere=c('Northern', 'Southern', 'Southern', 'Northern', 'Northern', 
+                        'Northern', 'Northern', 'Northern', 'Northern', 'Southern', 
+                        'Northern'),
+                 code=c("AFG","ARG",
+                        "AUS","CAN", "CHN", 
+                        "COL", "EGY", "DEU", 
+                        "IRL", "ZAF", "USA"),
+                 stringsAsFactors=FALSE)
+
+# reshape table from wide to long format
+lst <- melt(st, id.vars=1:1, variable.name="country", value.name="count")
+
+# map additional data to data frame
+lst$continent <- d1$continent[match(lst$country, d1$country)]
+lst$hemisphere <- d1$hemisphere[match(lst$country, d1$country)]
+lst$code <- d1$code[match(lst$country, d1$country)]
+```
+
+## Visualization 1
+
+#### Create Linked Plots Showing Flu Cases per Country and Total Flu Cases per Week
+
+In this example a dropdown selector and a time slider provided by the _crosstalk_ package are linked to two plots created by _plotly_.
+
+Key methods and settings used:
+
+* `SharedData$new` (`crosstalk` package) to create a new shared data object that can represent a collection of selected objects, e.g. to enable brushing and linking across plots
+* `add_markers`, `add_lines`, `add_bars` to create the corresponding plots
+* `layout( barmode = 'stack')` to create a stacked bar chart
+* `subplot` (`plotly` package) to combine two or more `plotly` plots with `shareX=TRUE` to combine the `x` axes of the plots
+* `filter_select` and `filter_slider` to create `crosstalk` controls
+* `bscols` (`crosstalk` package) to arrange plots and controls into columns
+* `hide_legend` to turn off Plotly legend
+
+#### Recommended Resources
+
+* https://plotly-book.cpsievert.me/linking-views-without-shiny.html
+* https://plot.ly/r/bar-charts/
+* https://rstudio.github.io/crosstalk/using.html
+
+******
+
+```{r, echo=FALSE, warning=FALSE}
+sd1 <- SharedData$new(lst)
+base1 <- plot_ly(sd1) 
+
+p1 <- 
+  base1 %>%
+  hide_legend() %>%
+  add_lines( x=~week, y=~count, color=~country, colors = "Dark2") %>%
+  add_markers( x=~week, y=~count, color=~country, colors = "Dark2")
+
+# 1. create a stacked bar chart
+p2 <- 
+  base1 %>% 
+  hide_legend() %>%
+  add_bars(x=~week, y=~count,  colors = "Dark2") 
+
+# 2. create a subplot to link the two plots
+p3 <- subplot(p1, p2, titleX = TRUE, nrows = 2, shareX = TRUE) %>% 
+  layout( barmode = 'stack', title = "Flu Cases by Country and Totals week") %>%
+  hide_legend() 
+
+# 3. add the slider control to filter weeks to this bscols configuration
+bscols(
+  widths=c(3,9),
+  list(
+    filter_select('count', 'Country', sd1, ~country ),
+    filter_slider('week','Week',sd1,~week)),
+  p3) 
+
+
+# 4. replace this plot with your subplot object
+```
+
+******
+
+## Visualization 2
+
+#### Create an Overview+Detail Plot Showing Flu Cases per Country
+
+In this example a checkbox selection is used to control countries of which continents are shown in a stacked bar chart. The stacked bar chart shows flu cases per week and country. The overview+detail visualization is enabled by using the `rangeslider` property on the `x` axis of the plot.
+
+Key methods and settings used:
+
+* `filter_checkbox` to create `crosstalk` checkbox list. 
+
+#### Recommended Resources
+
+* https://plot.ly/r/range-slider/
+
+******
+
+```{r, echo=FALSE, warning=FALSE}
+sd2 <- SharedData$new(lst)
+base2 <- plot_ly(sd2) 
+
+p4 <- 
+  base2 %>% 
+  hide_legend() %>%
+  add_bars(x=~week, y=~count, color=~country ,colors = "Dark2") %>%
+  add_markers(x=~week, y=~count, color=~country ,colors = "Dark2") %>%
+  layout(barmode = 'stack', title = "Flu Cases by Country", xaxis = list(rangeslider = list(type = "week")))
+  
+
+bscols(
+  widths=c(3,9),
+  list(
+    filter_checkbox('continent', 'Continent', sd2, ~continent )),
+  p4) 
+
+```
+
+******
+
+## Visualization 3
+
+#### Create Linked Plots Showing Flu Cases per Country per Week and Total Flu Cases per Country
+
+For this visualization we create two linked plots. One that shows flu cases per country per week and a second on that show the total of all flu cases per country.
+
+Key methods and settings used:
+
+* `group_by(country)` to group the data frame by country
+* `summarise` with `sum` to compute the totals per country
+* `arrange` to sort the countries by the total of flu cases
+* `subplot` to link the two plots
+
+#### Recommended Resources
+
+* https://plotly-book.cpsievert.me/linking-views-without-shiny.html (in particular _4.2.5 The SharedData plot pipeline_)
+
+******
+
+```{r, echo=FALSE, out.width="100%"}
+sd4 <- SharedData$new(lst, key=~country)
+base4 <- plot_ly(sd4) %>% group_by(country)
+
+p5 <- base4 %>% 
+  hide_legend() %>%
+  add_lines(x=~week, y=~count, color=~country ,colors = "Dark2") %>%
+  layout( title = "Flu Cases by Country and Country Total")
+
+
+p6 <- base4 %>% 
+  hide_legend() %>%
+  summarise(count.sum=sum(count,na.rm = T)) %>%
+  arrange(desc(count.sum)) %>% 
+  add_bars(x=~count.sum, y=~factor(country, levels = country), colors = "Dark2")
+
+
+s4 <- subplot(p5, p6, titleX = TRUE, nrows = 2, shareX = F) %>% 
+  hide_legend() 
+
+s4
+```
+
+******
+
+## Visualization 4
+
+#### Create a Choropleth Map Showing Flu Cases per Country
+
+This visualization uses `crosstalk` controls to select continent and weeks for which flu cases should be shown in the choropleth map. 
+
+Key methods and settings used:
+
+* The appearance of the map is controlled by `showframe`, `showcoastlines`, `showland`, `landcolor`, and `projection` (here 'Mercator').
+
+#### Recommended Resources
+
+* https://plot.ly/r/choropleth-maps/
+
+******
+
+```{r, echo=FALSE, warning=FALSE}
+sd3 <- lst %>% na.omit() %>% SharedData$new()
+
+g <- list(
+  showframe = F,
+  showcoastlines = T,
+  showland = T,
+  landcolor = toRGB("grey"),
+  projection = list(type = 'Mercator')
+)
+
+p7 <- plot_geo(sd3) %>% 
+  add_trace(z=~count,color = ~count, colors = 'Blues', text = ~country, locations = ~code, 
+            marker = list(line = list(color = toRGB("grey"), width = 0.5))) %>%
+  colorbar(title = "Flu Cases") %>%
+  layout(
+    title = 'Flu Cases',
+    geo = g
+  )
+
+bscols(
+  widths=c(3,9),
+  list(
+    filter_checkbox('continent', 'Continent', sd3, ~continent ),
+    filter_select('week','Week',sd3,~week,multiple = F)),
+  p7) 
+```
