@@ -50,10 +50,7 @@ ui <- fluidPage(
       tabPanel("Trend", plotlyOutput("trend")),
       tabPanel("Table", dataTableOutput("table"))
     )
-    # plotlyOutput("map"),
-    # plotlyOutput("trend"),
-    # plotlyOutput("hist")
-    #verbatimTextOutput("click")
+
   )
 );
 
@@ -61,8 +58,7 @@ server <- function(input, output,session) {
   
 
   
- # output$map <- renderPlotly({
-    
+
     output$map <- renderPlotly({
       
       geo <- list(
@@ -143,18 +139,13 @@ server <- function(input, output,session) {
         theme_bw(base_size = 12)
     })
     
-    # output$click <- renderPrint({
-    #   d <- event_data("plotly_click")
-    #   
-    #   if (is.null(d) == T) return (NULL);
-    #   
-    #   if (is.null(d)) "Click events appear here (double-click to clear)" else d
-    # });
-  #})
+
   output$table <- renderDataTable({
     testdat %>% 
       filter(Year==input$selectyear) %>% 
-      filter(Parameter.Name==input$selectpara)
+      filter(Parameter.Name==input$selectpara) %>%
+      mutate(Location=paste0(tolower(State.Name),",",tolower(County.Name))) %>%
+      filter(Location==tolower(input$selectcounty))
   })
 };
 
