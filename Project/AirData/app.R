@@ -23,6 +23,7 @@ ui <- fluidPage(
     h2("How to use"),
     p("First, select the air parameter of insterest. 
       Then, select year to view the parameter quantity across US county in that year.
+      Click on the map to see the histogram of the parameter in clicked county.
       If you want to see the trend of the parameter, click Trend tab.
       Then, select the county of interest.
       There is also raw data available to filter and explore under Table tab."),
@@ -46,7 +47,7 @@ ui <- fluidPage(
   
   mainPanel(
     tabsetPanel(
-      tabPanel("Map", plotlyOutput("map")), 
+      tabPanel("Map", plotlyOutput("map"),plotlyOutput("hist")),
       tabPanel("Trend", plotlyOutput("trend")),
       tabPanel("Table", dataTableOutput("table"))
     )
@@ -55,10 +56,7 @@ ui <- fluidPage(
 );
 
 server <- function(input, output,session) {
-  
-
-  
-
+  output$map <- renderPlotly({
     output$map <- renderPlotly({
       
       geo <- list(
@@ -85,7 +83,7 @@ server <- function(input, output,session) {
       county_para$color <- cut(county_para$Mean,
                                breaks = seq(min(county_para$Mean), 
                                             max(county_para$Mean), 
-                                            by = max(county_para$Mean) / 5)
+                                            by = (max(county_para$Mean)-min(county_para$Mean)) / 5)
       )
       
       county_para <- county_para %>% arrange(order)
@@ -97,7 +95,8 @@ server <- function(input, output,session) {
           y = ~ lat,
           color = ~ color,
           colors = c('#ffeda0', '#f03b20'),
-          text = ~ paste(loc, "<br />", Mean)) %>% 
+          text = ~ paste(loc, "<br />", Mean),
+          key = ~ loc) %>% 
         add_polygons(line = list(width = 0.4)) %>%
         add_polygons(
           fillcolor = 'transparent',
@@ -111,12 +110,28 @@ server <- function(input, output,session) {
         layout(title = paste0(input$selectpara, " by County"),
                legend=list(y=0.8, yanchor="top" ),
                geo = geo)
-
-      
-      # ggplotly(p)
-      p
+      ggplotly(p)
     })
     
+
+    output$hist <- renderPlotly({
+      d <- event_data("plotly_click")
+      if (is.null(d)) ggplot()+geom_histogram() else {
+        
+        dat <- testdat %>%
+          filter(Parameter.Name==input$selectpara) %>%
+          mutate(loc=paste0(tolower(State.Name),",",tolower(County.Name))) %>%
+          filter(loc==d[1,3])
+        p <- ggplot(dat,aes(x=Arithmetic.Mean,fill=as.factor(Year))) + 
+          geom_histogram() + 
+          labs(title=paste0("Histogram of ",input$selectpara, " in ", d[1,3])) +
+          theme_bw()
+        ggplotly(p)
+      }
+      
+    })
+    
+})
     
     # Trend Plot
     output$trend <- renderPlotly({

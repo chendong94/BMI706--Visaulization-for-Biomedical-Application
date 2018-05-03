@@ -1,7 +1,7 @@
 ---
 title: "BMI706Project"
 author: "Chen Dong"
-date: "4/26/2018"
+date: "5/3/2018"
 output: html_document
 ---
 
@@ -21,30 +21,28 @@ library(mapproj)
 - Apply skills acquired in task analysis, design space exploration, and software implementation for a data visualization projects.
 - Create a Shiny app for interactive, exploratory visualization of a complex, heterogeneous data set.
 
-### Step 1: Identify a data set and visualization tasks (due 4/19)
-1. Identify a data set of interest for your visualization project.  
+### Step 1: Identify a data set and visualization tasks
+#### 1. Identify a data set of interest for your visualization project.  
 The data set of interest is the annual air quality data collected at outdoor monitors across the US.  
 Source: https://aqs.epa.gov/aqsweb/airdata/download_files.html
 
-2. Describe what kind of information can be derived through exploratory visualization
-analysis of the data set.  
+#### 2. Describe what kind of information can be derived through exploratory visualization analysis of the data set.  
 To explore the trend of air pollutants across years and compare the trend of individual pollutant.
 
-3. Identify the target audience for the visualization tool that you will build.  
+#### 3. Identify the target audience for the visualization tool that you will build.  
 The target audience would be anyone interested in the air quility and specific pollutants in the US. They could be researchers with expert knowledge or anyone without previous experience in the field.
 
-4. Develop a list of visualization tasks for the data set.  
+#### 4. Develop a list of visualization tasks for the data set.  
 A. Visualize the mean quantity of the pollutant (user choose) in a year at outdoor monitors across the US on a US map.  
 B. Visualize the scatter plot of the mean quantity of individual pollutants vs years.  
 C. Visualize the heatmap of the mean quantity of all pollutants across years.  
 D. Visualize the distribution of all pollutants in a year or in multiple years.  
 
-5. Describe the data types present in your data set (temporal, networks, multivariate
-matrices, etc.).  
+#### 5. Describe the data types present in your data set (temporal, networks, multivariate matrices, etc.).  
 Multivariate data including categorical, numerical, geographical, binary and date.  
 
-### Step 2: Apply Five Design Sheet Methodology (4/26)
-1. Apply Five Design Sheet Methodology.  
+### Step 2: Apply Five Design Sheet Methodology
+#### 1. Apply Five Design Sheet Methodology.  
 
 ![](1.jpg)
 ![](2.jpg)
@@ -52,208 +50,75 @@ Multivariate data including categorical, numerical, geographical, binary and dat
 ![](3.jpg)
 
 
-2. Describe potential visualization challenges.  
+#### 2. Describe potential visualization challenges.  
 Some visaulization challenges include the implementation of the shiny app, data preprocessing, and the layout of the whole visualization.  
 Note that your design may go beyond what you will actually implement in your Shiny app.
 
-### Step 3: Describe Implementation Strategy (due 4/26)
-Write a short paragraph describing how you are planning to implement your application and how different components of your visualization will be interacting with each other.   
+### Step 3: Describe Implementation Strategy
+#### Write a short paragraph describing how you are planning to implement your application and how different components of your visualization will be interacting with each other.   
 The shiny app will have two parts: one sidebar panel with controls and one main panel with three plots. The sidebar panel will have two sets of controls. The first set of controls is for the map, which includes one select input that selects years, one radia button that selects region, and one select input thtat selects pollutants. The second set of controls is for the distribution plot, which includes one multiple select input that selects and deselects region, and another multiple selection input that selects and deselects years. The three plots in the main panel are a US map, a distribution, and a trend line plot. When mouse hovering on the map, it will show the distribution of the pollutant in the region of the year. When clicking on the map, the distribution locks in and there will be a trend plot added for the pollutant in the region. Users can change the region, year, and pollution by side bar panel. They can click the map again, and a new distribution will add to the distribution if the same pollutant, and a new trend line will be added below the previous trend plot.  
 
+### Step 4: Implement Shiny Application 
+#### Implement your application using R, Shiny and Plotly. You may also create static ggplot2 visualizations in exceptional cases (e.g. if there is no appropriate Plotly plot available for your data).
+See https://dongchenhms.shinyapps.io/AirData1999-2004/.
+
+
+### Step 5: Prepare and Present a Live Demo 
+#### 1. Describe your data set.
+a. Why was the data collected?  
+The data is collected by EPA. The mission of EPA is to protect human health and the environment. The data is collected to ensure clean air and reduced environmental risks are based on the best available scientific information. AirData assists a wide range of people, from the concerned citizen who wants to know how many unhealthy air quality days there were in his county last year to air quality analysts in the regulatory, academic, and health research communities who need raw data.
+
+b. How was it collected?  
+The AirData is collected at outdoor monitors across the United States, Puerto Rico, and the U.S. Virgin Islands. The data comes primarily from the AQS (Air Quality System) database.  
+
+c. What are the characteristics of the data?  
+The data is multivariate and includes 55 variables with over 60,000 observations in each file. My visualization only need observations with “sample duration” of 24 hour. And it needs variables state code, county code, site number, parameter code, parameter name, year, units, mean, state name, county name.
+I also removed duplicated site number for the same parameter, state code, and county code. Since duplicated measures are just based on different measuring methods, so the measurement values are the same.  
+
+#### 2. Provide rationale for a visual exploration tool.
+a. Why is a visualization tool necessary?  
+Visualization of the air data makes eaiser to observe the overall pattern of the air parameter either across US or across multiple years.  
+
+b. What can we expect to learn?  
+The users can expect to learn the quantity of the selected air parameter on the county level of details in a year. They can also expect to learn the trend of the selected air parameter in the selected county across multiple years.  
+
+#### 3. Discuss your final design and justify your design decisions.
+a. Why did you choose your visual encodings?  
+First, a map is a general and easy way for people to observe the pattern of data with locations. (Fig 1) Using color to encoding the quantity of measurement is a straightforward way but will loss some level of details. So the table of the data of selection is available to view the details of the data. (Fig 2) A trend map is used to visualize the trend of selected parameter. The title and axis will automatically update the selected choices. A linear model fitting line is added to predict the trend. (Fig 3)  
+
+!["Fig 1. A US map plot with county level details showing the annual mean of the selected parameter using colors to indicate levels of quantity"](map.jpg)  
+
+
+!["Fig 2. A trend scatter plot with linear model fitting line showing the mean quantity of the parameter selected in the selected county across years (1999-2004)."](trend.jpg)  
+
+
+!["Fig 3. A data table to view the filtered data."](table.jpg)  
+
+
+b. What kind of interactions did you implement and why?  
+I would like to make the visaulization as simple as possible for the users to operate while having the desired functions. So the interactions I implemented are three multiple selections and three tabs to choose. User can also hover on the plot to see the details of the data.  
+
+c. Does your visualization scale with the size of the data?  
+The color encoding on the map plot used discrete scale where the parameter quantities are divided into 5 groups from the maximum to the minimum. Lower intensity of the color encodes the group with lower quantity of measurements.  
+
+#### 4. Provide a live demo that illustrates key features of your Shiny app  
+
+#### 5. Future improvements:
+a. Highlight the selected county or auto zoom on the selected county on map plot.  
+b. Add a histogram of the selected parameter.  
+c. Incorporate all years of data til 2018 and add visaulization on observations with “sample duration” besides 24 hour.  
+d. Time series prediction analysis on the trend plot to make prediction of the future air parameter quantity.  
 
 ### Preprocessed data looks like below, data from 1999 to 2004 will be use
 
 ```{r}
 # only read in first 200 rows for testing purpose
-testdat <- read.csv("airdata.csv",stringsAsFactors = F,nrows = 200)
+datfile <- "https://raw.githubusercontent.com/chendong94/BMI706-Visaulization-for-Biomedical-Application/master/Project/airdata.csv"
+testdat <- read.csv(datfile ,stringsAsFactors = F,nrows = 200)
 str(testdat)
 ```
 
 
-```{r, echo=FALSE, warning=FALSE}
-
-sd3 <- lst %>% na.omit() %>% SharedData$new()
-
-g <- list(
-  showframe = F,
-  showcoastlines = T,
-  showland = T,
-  landcolor = toRGB("grey"),
-  projection = list(type = 'Mercator')
-)
-
-p7 <- plot_geo(sd3) %>% 
-  add_trace(z=~count,color = ~count, colors = 'Blues', text = ~country, locations = ~code, 
-            marker = list(line = list(color = toRGB("grey"), width = 0.5))) %>%
-  colorbar(title = "Flu Cases") %>%
-  layout(
-    title = 'Flu Cases',
-    geo = g
-  )
-
-bscols(
-  widths=c(3,9),
-  list(
-    filter_checkbox('continent', 'Continent', sd3, ~continent ),
-    filter_select('week','Week',sd3,~week,multiple = F)),
-  p7) 
-```
-
-
-```{r, include=FALSE}
-unemp <- read.csv("http://datasets.flowingdata.com/unemployment09.csv")
-names(unemp) <- c("id", "state_fips", "county_fips", "name", "year", 
-                  "?", "?", "?", "rate")
-unemp$county <- tolower(gsub(" County, [A-Z]{2}", "", unemp$name))
-unemp$state <- gsub("^.*([A-Z]{2}).*$", "\\1", unemp$name)
-county_df <- map_data("county")
-names(county_df) <- c("long", "lat", "group", "order", "state_name", "county")
-county_df$state <- state.abb[match(county_df$state_name, tolower(state.name))]
-county_df$state_name <- NULL
-state_df <- map_data("state")
-choropleth <- merge(county_df, unemp, by = c("state", "county"))
-choropleth <- choropleth[order(choropleth$order), ]
-choropleth$rate_d <- cut(choropleth$rate, breaks = c(seq(0, 10, by = 2), 35))
-
-# provide a custom tooltip to plotly with the county name and actual rate
-choropleth$text <- with(choropleth, paste0("County: ", name, "Rate: ", rate))
-p <- ggplot(choropleth, aes(long, lat, group = group)) +
-  geom_polygon(aes(fill = rate_d, text = text), 
-               colour = alpha("white", 1/2), size = 0.2) + 
-  geom_polygon(data = state_df, colour = "white", fill = NA) +
-  scale_fill_brewer(palette = "PuRd") + theme_void()
-# just show the text aesthetic in the tooltip
-ggplotly(p, tooltip = "text")
-```
-
-```{r}
-ggplot(mergedata, aes(long, lat, group = group)) +
-  geom_polygon(aes(fill = mean, text = NA), 
-               colour = alpha("white", 1/2), size = 0.2) + 
-  geom_polygon(data = state_df, colour = "white", fill = NA) +
-  scale_fill_brewer(palette = "PuRd") + theme_void()
-```
-
-
-
-```{r, include=FALSE}
-mapcounties <- map_data("county")
-mapstates <- map_data("state")
-counties <- map('county', fill=TRUE, col="transparent", plot=FALSE)
-IDs <- sapply(strsplit(counties$names, ":"), function(x) x[1])
-counties_sp <- map2SpatialPolygons(counties, IDs=IDs,
-proj4string=CRS("+proj=longlat +datum=WGS84"))
-pointsSP <- SpatialPoints(testdat[c("Longitude","Latitude")],
-                          proj4string=CRS("+proj=longlat +datum=WGS84"))
-indices <- over(pointsSP, counties_sp)
-
-countyNames <- sapply(counties_sp@polygons, function(x) x@ID)
-testdat$county <- countyNames[indices]
-mapcounties$county <- with(mapcounties , paste(region, subregion, sep = ","))
-
-# Aggregate our data at County Level (it was earlier aggreated at zipcode level)
-
-testdat.mean <- testdat %>% 
-  group_by_at(vars(Year,Parameter.Name,county)) %>% 
-  summarise(mean = mean(Arithmetic.Mean))
-
-# Remove any duplicate records
-
-mydata.un<-testdat[!duplicated(testdat[c("county")]),]
-
-# Merge the unique County list with the aggregated record list to get the final list 
-
-mydata.final=merge(testdat.mean,mydata.un,by.x='county',by.y = 'county')
-
-# Initialise the ColorBucket to divide the count and and use it for distributing colors for the heat-map
-
-mydata.final$colorBuckets <- as.factor(as.numeric(
-  cut(mydata.final$mean,
-      breaks = seq(0, max(mydata.final$mean), by = max(mydata.final$mean) / 5)
-      )))
-
-# Merge our data with all US counties data
-
-mergedata <- merge(mapcounties, mydata.final, by.x = "county", by.y = "county")
-
-# Arrange the Data in sorted order of Counts (this step may be removed)
-
-#mergedata <- mergedata[order(mergedata$counts),]
-
-# Now plot the data on a map using ggplot function from ggplot2 package
-
-map <- ggplot(mergedata, aes(long,lat,group=group)) + geom_polygon(aes(fill=colorBuckets))
-map <- map+theme(panel.background = element_rect(fill = "white"))
-map <- map + scale_fill_brewer(palette="PuRd") + 
-  coord_map(project="globular")
-map <- map + geom_path(data = mapstates, colour = "black", size = .3)
-map <- map + geom_path(data = mapcounties, colour = "black", size = .5, alpha = .1)
-map
-```
-
-
-
-
-
-
-```{r, include=FALSE}
-blank_layer <- list(
-  title = "",
-  showgrid = F,
-  showticklabels = F,
-  zeroline = F)
-
-
-
-
-df <- read.csv("https://raw.githubusercontent.com/bcdunbar/datasets/master/californiaPopulation.csv")
-
-cali <- map_data("county") %>%
-  filter(region == 'california')
-
-pop <- df %>%
-  group_by(County.Name) %>%
-  summarise(Pop = sum(Population))
-
-pop$County.Name <- tolower(pop$County.Name) # matching string
-
-cali_pop <- merge(cali, pop, by.x = "subregion", by.y = "County.Name")
-
-cali_pop$pop_cat <- cut(cali_pop$Pop, breaks = c(seq(0, 11000000, by = 500000)), labels=1:22)
-
-
-
-geo <- list(
-  scope = 'usa',
-  showland = TRUE,
-  landcolor = toRGB("gray95"),
-  countrycolor = toRGB("gray80")
-)
-
-p <- cali_pop %>%
-  group_by(group) %>%
-  plot_geo(
-    x = ~long, y = ~lat, color = ~pop_cat, colors = c('#ffeda0','#f03b20'),
-    text = ~subregion, hoverinfo = 'text') %>%
-  add_polygons(line = list(width = 0.4)) %>%
-  add_polygons(
-    fillcolor = 'transparent',
-    line = list(color = 'black', width = 0.5),
-    showlegend = FALSE, hoverinfo = 'none'
-  ) %>%
-  layout(
-    title = "California Population by County",
-    geo = geo)
-
-p
-
-# # Create a shareable link to your chart
-# # Set up API credentials: https://plot.ly/r/getting-started
-# chart_link = api_create(p, filename="county-level-geo")
-# chart_link
-```
-
 
 Reference: http://www.grroups.com/blog/r-plotting-heat-map-choropleth-on-us-county-level-map-using-ggplot2
 
-Time series prediction analysis

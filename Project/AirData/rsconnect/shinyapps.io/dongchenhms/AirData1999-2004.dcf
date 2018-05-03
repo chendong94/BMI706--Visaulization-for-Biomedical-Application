@@ -5,8 +5,8 @@ account: dongchenhms
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 332813
-bundleId: 1344488
+bundleId: 1353027
 url: https://dongchenhms.shinyapps.io/AirData1999-2004/
-when: 1524897199.72413
+when: 1525321620.92907
 asMultiple: FALSE
 asStatic: FALSE
