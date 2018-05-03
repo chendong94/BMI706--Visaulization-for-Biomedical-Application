@@ -77,26 +77,27 @@ I also removed duplicated site number for the same parameter, state code, and co
 
 #### 2. Provide rationale for a visual exploration tool.
 a. Why is a visualization tool necessary?  
-Visualization of the air data makes eaiser to observe the overall pattern of the air parameter either across US or across multiple years.  
+Visualization of the air data makes easier to observe the overall pattern of the air parameter either across US or across multiple years.  
 
 b. What can we expect to learn?  
 The users can expect to learn the quantity of the selected air parameter on the county level of details in a year. They can also expect to learn the trend of the selected air parameter in the selected county across multiple years.  
 
 #### 3. Discuss your final design and justify your design decisions.
 a. Why did you choose your visual encodings?  
-First, a map is a general and easy way for people to observe the pattern of data with locations. (Fig 1) Using color to encoding the quantity of measurement is a straightforward way but will loss some level of details. So the table of the data of selection is available to view the details of the data. (Fig 2) A trend map is used to visualize the trend of selected parameter. The title and axis will automatically update the selected choices. A linear model fitting line is added to predict the trend. (Fig 3)  
+First, a map is a general and easy way for people to observe the pattern of data with locations. (Fig 1) User can hover on the map to see the county name and mean value of the air parameter. Using color to encoding the quantity of measurement is a straightforward way but will loss some level of details. So when the user click on a specific county on the map, it will show a histogram of the air parameter in the county user clicked. (Fig 2) Also the table of the data of selection is available to view the details of the data. (Fig 3) A trend map is used to visualize the trend of selected parameter. The title and axis will automatically update the selected choices. A linear model fitting line is added to predict the trend. (Fig 4)  
 
 !["Fig 1. A US map plot with county level details showing the annual mean of the selected parameter using colors to indicate levels of quantity"](map.jpg)  
 
+!["Figure 2. A Histogram of the air parameter of selection in the county user click on the map"](hist.jpg)
 
-!["Fig 2. A trend scatter plot with linear model fitting line showing the mean quantity of the parameter selected in the selected county across years (1999-2004)."](trend.jpg)  
+!["Fig 3. A trend scatter plot with linear model fitting line showing the mean quantity of the parameter selected in the selected county across years (1999-2004)."](trend.jpg)  
 
 
-!["Fig 3. A data table to view the filtered data."](table.jpg)  
+!["Fig 4. A data table to view the filtered data."](table.jpg)  
 
 
 b. What kind of interactions did you implement and why?  
-I would like to make the visaulization as simple as possible for the users to operate while having the desired functions. So the interactions I implemented are three multiple selections and three tabs to choose. User can also hover on the plot to see the details of the data.  
+I would like to make the visaulization as simple as possible for the users to operate while having the desired functions. So the interactions I implemented are three multiple selections and three tabs to choose. User can also hover on the plot to see the details of the data. Clicking on the map will show a histogram of the clicked county.   
 
 c. Does your visualization scale with the size of the data?  
 The color encoding on the map plot used discrete scale where the parameter quantities are divided into 5 groups from the maximum to the minimum. Lower intensity of the color encodes the group with lower quantity of measurements.  
@@ -105,9 +106,8 @@ The color encoding on the map plot used discrete scale where the parameter quant
 
 #### 5. Future improvements:
 a. Highlight the selected county or auto zoom on the selected county on map plot.  
-b. Add a histogram of the selected parameter.  
-c. Incorporate all years of data til 2018 and add visaulization on observations with “sample duration” besides 24 hour.  
-d. Time series prediction analysis on the trend plot to make prediction of the future air parameter quantity.  
+b. Incorporate all years of data til 2018 and add visaulization on observations with “sample duration” besides 24 hour.  
+c. Time series prediction analysis on the trend plot to make prediction of the future air parameter quantity.  
 
 ### Preprocessed data looks like below, data from 1999 to 2004 will be use
 
